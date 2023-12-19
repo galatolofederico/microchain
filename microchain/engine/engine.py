@@ -31,20 +31,28 @@ class Engine:
 
         function_name = tree.body[0].value.func.id
         function_args = tree.body[0].value.args
+        function_kwargs = tree.body[0].value.keywords
 
         for arg in function_args:
             if not isinstance(arg, ast.Constant):
                 return FunctionResult.ERROR, f"Error: the command {command} must be a function call, you cannot use variables"
 
+        for kwarg in function_kwargs:
+            if not isinstance(kwarg, ast.keyword):
+                return FunctionResult.ERROR, f"Error: the command {command} must be a function call, you cannot use variables"
+            if not isinstance(kwarg.value, ast.Constant):
+                return FunctionResult.ERROR, f"Error: the command {command} must be a function call, you cannot use variables"
+
         function_args = [arg.value for arg in function_args]
+        function_kwargs = {kwarg.arg: kwarg.value.value for kwarg in function_kwargs}
 
         if function_name not in self.functions:
             return FunctionResult.ERROR, f"Error: unknown command {command}"
         
-        if len(function_args) != len(self.functions[function_name].args):
+        if len(function_args) + len(function_kwargs) != len(self.functions[function_name].call_parameters):
             return FunctionResult.ERROR, self.functions[function_name].error()
 
-        return self.functions[function_name](function_args, self.state)
+        return self.functions[function_name].safe_call(args=function_args, kwargs=function_kwargs)
             
     
     def help(self):
