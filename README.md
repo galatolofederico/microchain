@@ -1,11 +1,11 @@
-# microagent
+# microchain
 
 function calling-based LLM agents. Just that, no bloat.
 
 ## Installation
 
 ```
-pip install microagent
+pip install microchain
 ```
 
 ## Define LLM and template
