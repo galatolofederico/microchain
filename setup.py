@@ -5,7 +5,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "README.md")
     long_description = fh.read()
 
 setuptools.setup(
-    name="microchain",
+    name="microchain-python",
     version="0.1",
     author="Federico A. Galatolo",
     author_email="federico.galatolo@unipi.it",
@@ -13,7 +13,7 @@ setuptools.setup(
     url="",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
+    packages=["microchain"],
     install_requires=[
         "termcolor==2.4.0",
     ],
