@@ -56,11 +56,10 @@ class Function:
         if self.state is None:
             raise ValueError("You must register the function to an Engine")
 
-
     def safe_call(self, args, kwargs):
         self.check_bind()
         try:
-            return FunctionResult.SUCCESS, self.__call__(*args, **kwargs)
+            return FunctionResult.SUCCESS, str(self.__call__(*args, **kwargs))
         except TypeError:
             return FunctionResult.ERROR, self.error
 
