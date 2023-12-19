@@ -41,7 +41,7 @@ class Sum(Function):
         return [2, 2]
     
     def __call__(self, a:int, b:int):
-        return str(self.state["board"]) + check_win(self.state["board"])
+        return a + b
 
 print(Sum().help)
 '''
