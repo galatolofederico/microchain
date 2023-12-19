@@ -68,7 +68,11 @@ Example: PlaceMark(x=1, y=1)
 
 Reasoning(reasoning: str)
 Use this function for your internal reasoning.
-Example: Reasoning(reasoning=I need to place a mark at 1 1)
+Example: Reasoning(reasoning=The next step to take is...)
+
+Stop()
+Use this function to stop the program.
+Example: Stop()
 
 
 You are playing with X.
@@ -129,4 +133,6 @@ The reasoning has been recorded
    | O | X . You won!
 >> Reasoning("I have won the game!")
 The reasoning has been recorded
+>> Stop()
+The program has been stopped
 ```

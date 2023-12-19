@@ -4,6 +4,7 @@ from dotenv import load_dotenv   # pip install python-dotenv
 from tictactoe import Board      # pip install python-tictactoe
 
 from microchain import OpenAITextGenerator, HFChatTemplate, LLM, Function, Engine, Agent
+from microchain.functions import Reasoning, Stop
 
 def check_win(board):
     if board.has_won(1):
@@ -50,32 +51,6 @@ class PlaceMark(Function):
         self.engine.stop()
         return f"Placed mark at {x} {y}." + check_win(self.state["board"]) + ". The game is over"
 
-class Reasoning(Function):
-    @property
-    def description(self):
-        return "Use this function for your internal reasoning"
-
-    @property
-    def example_args(self):
-        return ["I need to place a mark at 1 1"]
-
-    def __call__(self, reasoning: str):
-        return f"The reasoning has been recorded"
-
-
-class Stop(Function):
-    @property
-    def description(self):
-        return "Use this function to stop the game"
-
-    @property
-    def example_args(self):
-        return []
-
-    def __call__(self):
-        self.engine.stop()
-
-
 load_dotenv()
 
 generator = OpenAITextGenerator(
@@ -92,6 +67,7 @@ engine = Engine(state=dict(board=Board()))
 engine.register(State())
 engine.register(PlaceMark())
 engine.register(Reasoning())
+engine.register(Stop())
 
 agent = Agent(llm=llm, engine=engine)
 agent.prompt = f"""Act as a tic tac toe playing AI. You can use the following functions:
