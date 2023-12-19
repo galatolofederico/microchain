@@ -7,12 +7,23 @@ class Engine:
         self.state = state
         self.functions = dict()
         self.help_called = False
+        self.agent = None
     
     def register(self, function):
         self.functions[function.name] = function
-        function.bind(self.state)
+        function.bind(state=self.state, engine=self)
+
+    def bind(self, agent):
+        self.agent = agent
+
+    def stop(self):
+        if self.agent is None:
+            raise ValueError("You must bind the engine to an agent before stopping")
+        self.agent.stop()
 
     def execute(self, command):
+        if self.agent is None:
+            raise ValueError("You must bind the engine to an agent before executing commands")
         if not self.help_called:
             raise ValueError("You never accessed the help property. Building a prompt without including the help string is a very bad idea.")
         try:

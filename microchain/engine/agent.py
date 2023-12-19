@@ -8,6 +8,9 @@ class Agent:
         self.max_tries = 10
         self.prompt = None
         self.bootstrap = []
+        self.do_stop = False
+
+        self.engine.bind(self)
 
     def build_initial_messages(self):
         history = [
@@ -38,6 +41,9 @@ class Agent:
         reply = reply[:reply.rfind(")")+1]
         return reply
 
+    def stop(self):
+        self.do_stop = True
+
     def run(self, iterations=10):
         if self.prompt is None:
             raise ValueError("You must set a prompt before running the agent")
@@ -49,11 +55,16 @@ class Agent:
         print(colored(f"Running {iterations} iterations", "green"))
 
         for it in range(iterations):
+            if self.do_stop:
+                break
             state = FunctionResult.ERROR
             temp_messages = []
             tries = 0
             abort = False
             while state != FunctionResult.SUCCESS:
+                if self.do_stop:
+                    abort = True
+                    break
                 if tries > self.max_tries:
                     print(colored(f"Tried {self.max_tries} times (agent.max_tries) Aborting", "red"))
                     abort = True
@@ -95,6 +106,5 @@ class Agent:
                 content=out
             ))
             
-
         print(colored(f"Finished {iterations} iterations", "green"))
         print("--------------------")

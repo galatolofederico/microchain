@@ -18,9 +18,11 @@ class Function:
                 annotation=parameter.annotation
             ))
         self.state = None
+        self.engine = None
     
-    def bind(self, state):
+    def bind(self, *, state, engine):
         self.state = state
+        self.engine = engine
 
     @property
     def name(self):
@@ -32,7 +34,7 @@ class Function:
             raise ValueError("example_args must be a list")
         if len(self.example_args) != len(self.call_parameters):
             raise ValueError(f"example_args must have the same length as call_parameters ({len(self.call_parameters)})")
-        
+
         bound = self.call_signature.bind(*self.example_args)
         
         return f"{self.name}({', '.join([f'{name}={value}' for name, value in bound.arguments.items()])})"
