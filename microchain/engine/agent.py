@@ -51,7 +51,6 @@ class Agent:
         if self.prompt is None:
             raise ValueError("You must set a prompt before running the agent")
 
-        print("--------------------")
         print(colored(f"prompt:\n{self.prompt}", "blue"))
         print(colored(f"Running {iterations} iterations", "green"))
 
@@ -110,4 +109,3 @@ class Agent:
             ))
             
         print(colored(f"Finished {iterations} iterations", "green"))
-        print("--------------------")
