@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "README.md")
 
 setuptools.setup(
     name="microchain-python",
-    version="0.1.0",
+    version="0.2",
     author="Federico A. Galatolo",
     author_email="federico.galatolo@unipi.it",
     description="",
