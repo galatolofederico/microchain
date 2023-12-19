@@ -23,7 +23,10 @@ class Agent:
             result, output = self.engine.execute(command)
             if result == FunctionResult.ERROR:
                 raise Exception(f"Your bootstrap commands contain an error. output={output}")
-            
+
+            print(colored(f">> {command}", "blue"))
+            print(colored(f"{output}", "green"))
+
             history.append(dict(
                 role="assistant",
                 content=command
@@ -47,12 +50,12 @@ class Agent:
     def run(self, iterations=10):
         if self.prompt is None:
             raise ValueError("You must set a prompt before running the agent")
-        
-        history = self.build_initial_messages()
 
         print("--------------------")
-        print(colored(f"prompt:\n{history[0]['content']}", "blue"))
+        print(colored(f"prompt:\n{self.prompt}", "blue"))
         print(colored(f"Running {iterations} iterations", "green"))
+
+        history = self.build_initial_messages()
 
         for it in range(iterations):
             if self.do_stop:
