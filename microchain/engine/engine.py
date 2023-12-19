@@ -6,12 +6,15 @@ class Engine:
     def __init__(self, state=dict()):
         self.state = state
         self.functions = dict()
+        self.help_called = False
     
     def register(self, function):
         self.functions[function.name] = function
         function.bind(self.state)
 
     def execute(self, command):
+        if not self.help_called:
+            raise ValueError("You never accessed the help property. Building a prompt without including the help string is a very bad idea.")
         try:
             tree = ast.parse(command)
         except SyntaxError:
@@ -52,8 +55,9 @@ class Engine:
         if len(function_args) + len(function_kwargs) != len(self.functions[function_name].call_parameters):
             return FunctionResult.ERROR, self.functions[function_name].error()
 
-        return self.functions[function_name].safe_call(args=function_args, kwargs=function_kwargs)
-            
+        return self.functions[function_name].safe_call(args=function_args, kwargs=function_kwargs)   
     
+    @property
     def help(self):
+        self.help_called = True
         return "\n".join([f.help for f in self.functions.values()])

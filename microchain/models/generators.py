@@ -40,10 +40,6 @@ class OpenAIChatGenerator:
         
         output = response.choices[0].text.strip()
 
-        if len(output) == 0:
-            print(colored(f"Error: {response}", "red"))
-            return "Error: undefined"
-
         return output
     
 
@@ -85,10 +81,6 @@ class OpenAITextGenerator:
             return "Error: timeout"
         
         output = response.choices[0].text.strip()
-
-        if len(output) == 0:
-            print(colored(f"Error: {response}", "red"))
-            return "Error: undefined"
 
         return output
     
