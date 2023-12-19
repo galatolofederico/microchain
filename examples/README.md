@@ -52,7 +52,7 @@ The program has been stopped
 
 ## Tic-Tac-Toe
 
-Example output of [tictactoe.py](tictactoe.py)
+Example output of [tic-tac-toe.py](tic-tac-toe.py)
 
 ```
 prompt:
