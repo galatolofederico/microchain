@@ -5,15 +5,6 @@ from tictactoe import Board      # pip install python-tictactoe
 
 from microchain import OpenAITextGenerator, HFChatTemplate, LLM, Function, Engine, Agent
 
-load_dotenv()
-
-generator = OpenAITextGenerator(
-    model=os.environ["MODEL_NAME"],
-    api_key=os.environ["API_KEY"],
-    api_base=os.environ["API_BASE"],
-    temperature=0.7
-)
-
 def check_win(board):
     if board.has_won(1):
         return ". You won!"
@@ -83,6 +74,16 @@ class Stop(Function):
 
     def __call__(self):
         self.engine.stop()
+
+
+load_dotenv()
+
+generator = OpenAITextGenerator(
+    model=os.environ["MODEL_NAME"],
+    api_key=os.environ["API_KEY"],
+    api_base=os.environ["API_BASE"],
+    temperature=0.7
+)
 
 template = HFChatTemplate(os.environ["TEMPLATE_NAME"])
 llm = LLM(generator=generator, templates=[template])
