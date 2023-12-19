@@ -29,8 +29,10 @@ class Agent:
                 role="user",
                 content=output
             ))
+        
+        return history
     
-    def clean_reply(reply):
+    def clean_reply(self, reply):
         reply = reply.replace("\_", "_")
         reply = reply.strip()
         reply = reply[:reply.rfind(")")+1]
@@ -43,7 +45,7 @@ class Agent:
         history = self.build_initial_messages()
 
         print("--------------------")
-        print(colored("prompt:\n", history[0]["content"], "blue"))
+        print(colored(f"prompt:\n{history[0]['content']}", "blue"))
         print(colored(f"Running {iterations} iterations", "green"))
 
         for it in range(iterations):
@@ -57,7 +59,8 @@ class Agent:
                     abort = True
                     break
                 tries += 1
-                reply = self.clean_reply(self.llm(history + temp_messages, stop=["\n"]))
+                reply = self.llm(history + temp_messages, stop=["\n"])
+                reply = self.clean_reply(reply)
                 if len(reply) < 2:
                     print(colored("Error: empty reply, aborting", "red"))
                     abort = True

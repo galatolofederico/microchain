@@ -30,6 +30,8 @@ class Function:
     def example(self):
         if not isinstance(self.example_args, list):
             raise ValueError("example_args must be a list")
+        if len(self.example_args) != len(self.call_parameters):
+            raise ValueError(f"example_args must have the same length as call_parameters ({len(self.call_parameters)})")
         
         bound = self.call_signature.bind(*self.example_args)
         
