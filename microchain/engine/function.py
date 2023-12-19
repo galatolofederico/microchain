@@ -1,20 +1,6 @@
 import enum
 import inspect
 
-EXAMPLE = """
-class PlaceMark(Function):
-    @property
-    def description(self):
-        return "Place a mark on the board"
-
-    @property
-    def example_args(self):
-        return [0, 0]
-
-    def __call__(self, /, x: int, y: int):
-        print(f"Placing mark at {x} {y}")
-"""
-
 class FunctionResult(enum.Enum):
     SUCCESS = 0
     ERROR = 1
@@ -31,6 +17,14 @@ class Function:
                 name=name,
                 annotation=parameter.annotation
             ))
+        self.state = None
+    
+    def bind(self, state):
+        self.state = state
+
+    @property
+    def name(self):
+        return type(self).__name__
 
     @property
     def example(self):
@@ -39,13 +33,12 @@ class Function:
         
         bound = self.call_signature.bind(*self.example_args)
         
-        return f"{type(self).__name__}({', '.join([f'{name}={value}' for name, value in bound.arguments.items()])})"
+        return f"{self.name}({', '.join([f'{name}={value}' for name, value in bound.arguments.items()])})"
     
     @property
     def signature(self):
-        fname = type(self).__name__
         arguments = [f"{parameter['name']}: {parameter['annotation'].__name__}" for parameter in self.call_parameters]
-        return f"{fname}({', '.join(arguments)})"
+        return f"{self.name}({', '.join(arguments)})"
 
     @property
     def help(self):
@@ -54,7 +47,10 @@ class Function:
     @property
     def error(self):
         return f"Error: wrong format. Use {self.signature}. Example: {self.example}"
-    
+
+    def check_bind(self):
+        if self.state is None:
+            raise ValueError("You must register the function to an Engine")
 
     def __call__(self, command):
         raise NotImplementedError
