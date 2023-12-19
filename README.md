@@ -24,7 +24,7 @@ template = HFChatTemplate(CHAT_TEMPLATE)
 llm = LLM(generator=generator, templates=[template])
 ```
 
-To use ChatGPT you don't APIs you don't need to apply a template
+To use ChatGPT APIs you don't you don't need to apply a template
 
 ```python
 from microchain import OpenAIChatGenerator, LLM
