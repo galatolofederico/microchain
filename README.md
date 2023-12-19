@@ -77,6 +77,12 @@ This function sums two numbers.
 Example: Sum(a=2, b=2)
 '''
 
+print(Product().help)
+'''
+Product(a: float, b: float)
+Use this function to compute the product of two numbers.
+Example: Product(a=2, b=2)
+'''
 ```
 
 ## Define a LLM Agent
