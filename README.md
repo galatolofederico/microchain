@@ -89,10 +89,9 @@ Example: Product(a=2, b=2)
 
 Register your functions with an `Engine()` using the `register()` function.
 
-Create an `Agent()` using your LLM and the specified execution `engine`. 
+Create an `Agent()` using the `llm` and the execution `engine`. 
 
-Define a prompt for the LLM and ensure to include documentation for all your functions using `engine.help()`. 
-
+Define a prompt for the LLM and include the functions documentation using `engine.help()`. 
 
 It's always a good idea to bootstrap the LLM with examples of function calls. Do this by setting `engine.bootstrap = [...]` with a list of function calls to run and prepend their results to the chat history.
 
