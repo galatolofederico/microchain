@@ -154,10 +154,12 @@ The reasoning has been recorded
 The reasoning has been recorded
 >> Sum(a=8, b=3)
 11
->> Reasoning("Finally, multiply the sum by 5")
+>> Reasoning("Lastly, multiply the sum by 5")
 The reasoning has been recorded
 >> Product(a=11, b=5)
 55
+>> Reasoning("So, the result of (2*4 + 3)*5 is 55")
+The reasoning has been recorded
 >> Stop()
 The program has been stopped
 ```
