@@ -1,6 +1,6 @@
 # microagent
 
-Function-calling based LLM agents. Just that, no bloat.
+function calling-based LLM agents. Just that, no bloat.
 
 ## Installation
 
@@ -24,9 +24,24 @@ template = HFChatTemplate(CHAT_TEMPLATE)
 llm = LLM(generator=generator, templates=[template])
 ```
 
+To use ChatGPT you don't APIs you don't need to apply a template
+
+```python
+from microchain import OpenAIChatGenerator, LLM
+
+generator = OpenAIChatGenerator(
+    model="gpt-3.5-turbo",
+    api_key=API_KEY,
+    api_base="https://api.openai.com/v1",
+    temperature=0.7
+)
+
+llm = LLM(generator=generator)
+```
+
 ## Define LLM functions
 
-Define **LLM callable functions** as basic Python objects, use **type annotations** to instruct the LLM to use the correct types.
+Define **LLM callable functions** as plain Python objects. Use **type annotations** to instruct the LLM to use the correct types.
 
 ```python
 from microchain import Function
@@ -34,14 +49,26 @@ from microchain import Function
 class Sum(Function):
     @property
     def description(self):
-        return "This function sums two numbers"
+        return "Use this function to compute the sum of two numbers"
     
     @property
     def example_args(self):
         return [2, 2]
     
-    def __call__(self, a:int, b:int):
+    def __call__(self, a: float, b: float):
         return a + b
+
+class Product(Function):
+    @property
+    def description(self):
+        return "Use this function to compute the product of two numbers"
+    
+    @property
+    def example_args(self):
+        return [2, 2]
+    
+    def __call__(self, a: float, b: float):
+        return a * b
 
 print(Sum().help)
 '''
@@ -49,201 +76,90 @@ Sum(a: int, b: int)
 This function sums two numbers.
 Example: Sum(a=2, b=2)
 '''
+
 ```
 
 ## Define a LLM Agent
 
+Register your functions with an `Engine()` using the `register()` function.
+
+Create an `Agent()` using your LLM and the specified execution `engine`. 
+
+Define a prompt for the LLM and ensure to include documentation for all your functions using `engine.help()`. 
+
+
+It's always a good idea to bootstrap the LLM with examples of function calls. Do this by setting `engine.bootstrap = [...]` with a list of function calls to run and prepend their results to the chat history.
+
 ```python
-from microchain import Engine
+from microchain import Agent, Engine
+from microchain.functions import Reasoning, Stop
 
 engine = Engine()
+engine.register(Reasoning())
+engine.register(Stop())
 engine.register(Sum())
+engine.register(Product())
 
 agent = Agent(llm=llm, engine=engine)
 agent.prompt = f"""Act as a calculator. You can use the following functions:
 
 {engine.help}
 
-Only output valid python function calls.
+Only output valid Python function calls.
 
-How much is 43 + 27?
+How much is (2*4 + 3)*5?
 """
+
+agent.bootstrap = [
+    'Reasoning("I need to reason step-by-step")',
+]
 agent.run()
 ```
 
+Running it will output something like:
 
-## Example
-
-A tic-tac-toe playing agent
-
-```python
-def check_win(board):
-    if board.has_won(1):
-        return ". You won!"
-    elif board.has_won(2):
-        return ". You lost!"
-    return ""
-
-class State(Function):
-    @property
-    def description(self):
-        return "Use this function to get the state of the board"
-
-    @property
-    def example_args(self):
-        return []
-
-    def __call__(self):
-        return str(self.state["board"]) + check_win(self.state["board"])
-
-class PlaceMark(Function):
-    @property
-    def description(self):
-        return "Use this function to place a mark on the board. x represents the row and y the column. Starts at 0"
-
-    @property
-    def example_args(self):
-        return [1, 1]
-
-    def __call__(self, x: int, y: int):
-        if (x, y) not in self.state["board"].possible_moves():
-            return f"Error: the move {x} {y} is not valid"
-        
-        try:
-            self.state["board"].push((x, y))
-        except Exception as e:
-            return f"Error: {e}"
-
-        if len(self.state["board"].possible_moves()) > 0:
-            move = random.choice(self.state["board"].possible_moves())
-            self.state["board"].push(move)
-            return f"Placed mark at {x} {y}. Your opponent placed a mark at {move[0]} {move[1]}." + check_win(self.state["board"])
-
-        self.engine.stop()
-        return f"Placed mark at {x} {y}." + check_win(self.state["board"]) + ". The game is over"
-
-class Reasoning(Function):
-    @property
-    def description(self):
-        return "Use this function for your internal reasoning"
-
-    @property
-    def example_args(self):
-        return ["I need to place a mark at 1 1"]
-
-    def __call__(self, reasoning: str):
-        return f"The reasoning has been recorded"
-
-
-class Stop(Function):
-    @property
-    def description(self):
-        return "Use this function to stop the game"
-
-    @property
-    def example_args(self):
-        return []
-
-    def __call__(self):
-        self.engine.stop()
-
-
-engine = Engine(state=dict(board=Board()))
-engine.register(State())
-engine.register(PlaceMark())
-engine.register(Reasoning())
-
-agent = Agent(llm=llm, engine=engine)
-agent.prompt = f"""Act as a tic tac toe playing AI. You can use the following functions:
-
-{engine.help}
-
-You are playing with X.
-Take a deep breath and work on this problem step-by-step.
-Always check the state of the board before placing a mark.
-Only output valid python function calls.
-"""
-agent.bootstrap = [
-    'Reasoning("I need to check the state of the board")',
-    'State()',
-]
-agent.run(iterations=30)
-
-'''
---------------------
+```
 prompt:
-Act as a tic tac toe playing AI. You can use the following functions:
-
-State()
-Use this function to get the state of the board.
-Example: State()
-
-PlaceMark(x: int, y: int)
-Use this function to place a mark on the board. x represents the row and y the column. Starts at 0.
-Example: PlaceMark(x=1, y=1)
+Act as a calculator. You can use the following functions:
 
 Reasoning(reasoning: str)
 Use this function for your internal reasoning.
-Example: Reasoning(reasoning=I need to place a mark at 1 1)
+Example: Reasoning(reasoning=The next step to take is...)
+
+Stop()
+Use this function to stop the program.
+Example: Stop()
+
+Sum(a: float, b: float)
+Use this function to compute the sum of two numbers.
+Example: Sum(a=2, b=2)
+
+Product(a: float, b: float)
+Use this function to compute the product of two numbers.
+Example: Product(a=2, b=2)
 
 
-You are playing with X.
-Take a deep breath and work on this problem step-by-step.
-Always check the state of the board before placing a mark.
-Only output valid python function calls.
+Only output valid Python function calls.
 
-Running 30 iterations
->> Reasoning("I need to check the state of the board")
+How much is (2*4 + 3)*5?
+
+Running 10 iterations
+>> Reasoning("I need to reason step-by-step")
 The reasoning has been recorded
->> State()
-   |   |   
------------
-   |   |   
------------
-   |   |   
->> Reasoning("The board is empty, I can place my mark anywhere.")
+>> Reasoning("First, calculate the product of 2 and 4")
 The reasoning has been recorded
->> PlaceMark(x=1, y=1)
-Placed mark at 1 1. Your opponent placed a mark at 0 1.
->> Reasoning("My opponent has placed their mark at 0 1, I will block them from getting three in a row.")
+>> Product(a=2, b=4)
+8
+>> Reasoning("Then, add 3 to the product of 2 and 4")
 The reasoning has been recorded
->> State()
-   |   |   
------------
- O | X |   
------------
-   |   |   
->> PlaceMark(x=1, y=0)
-Placed mark at 1 0. Your opponent placed a mark at 2 1.
->> Reasoning("My opponent has placed their mark at 2 1, I will block them from getting three in a row.")
+>> Sum(a=8, b=3)
+11
+>> Reasoning("Finally, multiply the sum by 5")
 The reasoning has been recorded
->> State()
-   | X |   
------------
- O | X | O 
------------
-   |   |   
->> PlaceMark(x=0, y=0)
-Placed mark at 0 0. Your opponent placed a mark at 1 2.
->> Reasoning("My opponent has placed their mark at 1 2, I will block them from getting three in a row.")
-The reasoning has been recorded
->> State()
- X | X |   
------------
- O | X | O 
------------
-   | O |   
->> PlaceMark(x=2, y=2)
-Placed mark at 2 2. Your opponent placed a mark at 2 0.. You won!
->> Reasoning("My opponent has placed their mark at 2 0, but I have already won the game!")
-The reasoning has been recorded
->> State()
- X | X | O 
------------
- O | X | O 
------------
-   | O | X . You won!
->> Reasoning("I have won the game!")
-The reasoning has been recorded
-'''
+>> Product(a=11, b=5)
+55
+>> Stop()
+The program has been stopped
 ```
+
+You can find more examples [here](./examples/)
