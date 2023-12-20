@@ -76,7 +76,7 @@ class Product(Function):
 
 print(Sum().help)
 '''
-Sum(a: int, b: int)
+Sum(a: float, b: float)
 This function sums two numbers.
 Example: Sum(a=2, b=2)
 '''
