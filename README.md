@@ -24,7 +24,11 @@ template = HFChatTemplate(CHAT_TEMPLATE)
 llm = LLM(generator=generator, templates=[template])
 ```
 
-To use ChatGPT APIs you don't you don't need to apply a template
+Use `HFChatTemplate(template)` to use `tokenizer.apply_chat_template` from `huggingface`.
+
+You can also use `VicunaTemplate()` for a classic vicuna-style prompt.
+
+To use ChatGPT APIs you don't need to apply a template:
 
 ```python
 from microchain import OpenAIChatGenerator, LLM
