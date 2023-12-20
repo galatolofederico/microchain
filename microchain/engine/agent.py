@@ -50,6 +50,55 @@ class Agent:
     def stop(self):
         self.do_stop = True
 
+    def step(self):
+        result = FunctionResult.ERROR
+        temp_messages = []
+        tries = 0
+        abort = False
+        while result != FunctionResult.SUCCESS:
+            tries += 1
+
+            if self.do_stop:
+                abort = True
+                break
+
+            if tries > self.max_tries:
+                print(colored(f"Tried {self.max_tries} times (agent.max_tries) Aborting", "red"))
+                abort = True
+                break
+            
+            reply = self.llm(self.history + temp_messages, stop=["\n"])
+            reply = self.clean_reply(reply)
+
+            if len(reply) < 2:
+                print(colored("Error: empty reply, aborting", "red"))
+                abort = True
+                break
+
+            print(colored(f">> {reply}", "yellow"))
+            
+            result, output = self.engine.execute(reply)
+
+            if result == FunctionResult.ERROR:
+                print(colored(output, "red"))
+                temp_messages.append(dict(
+                    role="assistant",
+                    content=reply
+                ))
+                temp_messages.append(dict(
+                    role="user",
+                    content=output
+                ))
+            else:
+                print(colored(output, "green"))
+                break
+        
+        return dict(
+            abort=abort,
+            reply=reply,
+            output=output,
+        )
+
     def run(self, iterations=10):
         if self.prompt is None:
             raise ValueError("You must set a prompt before running the agent")
@@ -63,52 +112,19 @@ class Agent:
         for it in range(iterations):
             if self.do_stop:
                 break
-            state = FunctionResult.ERROR
-            temp_messages = []
-            tries = 0
-            abort = False
-            while state != FunctionResult.SUCCESS:
-                if self.do_stop:
-                    abort = True
-                    break
-                if tries > self.max_tries:
-                    print(colored(f"Tried {self.max_tries} times (agent.max_tries) Aborting", "red"))
-                    abort = True
-                    break
-                tries += 1
-                reply = self.llm(self.history + temp_messages, stop=["\n"])
-                reply = self.clean_reply(reply)
-                if len(reply) < 2:
-                    print(colored("Error: empty reply, aborting", "red"))
-                    abort = True
-                    break
 
-                print(colored(f">> {reply}", "yellow"))
-                
-                state, out = self.engine.execute(reply)
-
-                if state == FunctionResult.ERROR:
-                    print(colored(out, "red"))
-                    temp_messages.append(dict(
-                        role="assistant",
-                        content=reply
-                    ))
-                    temp_messages.append(dict(
-                        role="user",
-                        content=out
-                    ))
+            step_output = self.step()
             
-            if abort:
+            if step_output["abort"]:
                 break
 
-            print(colored(out, "green"))
             self.history.append(dict(
                 role="assistant",
-                content=reply
+                content=step_output["reply"]
             ))
             self.history.append(dict(
                 role="user",
-                content=out
+                content=step_output["output"]
             ))
             
         print(colored(f"Finished {iterations} iterations", "green"))
