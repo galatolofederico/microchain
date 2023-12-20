@@ -38,7 +38,7 @@ class OpenAIChatGenerator:
             print(colored(f"Error: {e}", "red"))
             return "Error: timeout"
         
-        output = response.choices[0].text.strip()
+        output = response.choices[0].message.content.strip()
 
         return output
     
