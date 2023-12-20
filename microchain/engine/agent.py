@@ -11,9 +11,14 @@ class Agent:
         self.do_stop = False
 
         self.engine.bind(self)
+        self.reset()
+
+    def reset(self):
+        self.history = []
+        self.do_stop = False
 
     def build_initial_messages(self):
-        history = [
+        self.history = [
             dict(
                 role="user",
                 content=self.prompt
@@ -27,17 +32,15 @@ class Agent:
             print(colored(f">> {command}", "blue"))
             print(colored(f"{output}", "green"))
 
-            history.append(dict(
+            self.history.append(dict(
                 role="assistant",
                 content=command
             ))
-            history.append(dict(
+            self.history.append(dict(
                 role="user",
                 content=output
             ))
-        
-        return history
-    
+            
     def clean_reply(self, reply):
         reply = reply.replace("\_", "_")
         reply = reply.strip()
@@ -54,7 +57,8 @@ class Agent:
         print(colored(f"prompt:\n{self.prompt}", "blue"))
         print(colored(f"Running {iterations} iterations", "green"))
 
-        history = self.build_initial_messages()
+        self.reset()
+        self.build_initial_messages()
 
         for it in range(iterations):
             if self.do_stop:
@@ -72,7 +76,7 @@ class Agent:
                     abort = True
                     break
                 tries += 1
-                reply = self.llm(history + temp_messages, stop=["\n"])
+                reply = self.llm(self.history + temp_messages, stop=["\n"])
                 reply = self.clean_reply(reply)
                 if len(reply) < 2:
                     print(colored("Error: empty reply, aborting", "red"))
@@ -98,11 +102,11 @@ class Agent:
                 break
 
             print(colored(out, "green"))
-            history.append(dict(
+            self.history.append(dict(
                 role="assistant",
                 content=reply
             ))
-            history.append(dict(
+            self.history.append(dict(
                 role="user",
                 content=out
             ))
