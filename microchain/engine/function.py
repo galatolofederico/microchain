@@ -1,5 +1,7 @@
 import enum
 import inspect
+import traceback
+from termcolor import colored
 
 class FunctionResult(enum.Enum):
     SUCCESS = 0
@@ -60,7 +62,9 @@ class Function:
         self.check_bind()
         try:
             return FunctionResult.SUCCESS, str(self.__call__(*args, **kwargs))
-        except TypeError:
+        except Exception as e:
+            print(colored(f"Exception in Function call {e}", "red"))
+            print(colored(''.join(traceback.TracebackException.from_exception(e).format()), "red"))
             return FunctionResult.ERROR, self.error
 
     def __call__(self, command):
