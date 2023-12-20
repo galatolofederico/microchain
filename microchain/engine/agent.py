@@ -55,6 +55,8 @@ class Agent:
         temp_messages = []
         tries = 0
         abort = False
+        output = ""
+        reply = ""
         while result != FunctionResult.SUCCESS:
             tries += 1
 
