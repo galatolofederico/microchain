@@ -83,7 +83,6 @@ class Agent:
                 
                 state, out = self.engine.execute(reply)
 
-                temp_messages = []
                 if state == FunctionResult.ERROR:
                     print(colored(out, "red"))
                     temp_messages.append(dict(
