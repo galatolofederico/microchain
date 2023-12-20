@@ -13,7 +13,7 @@ setuptools.setup(
     url="",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=["microchain"],
+    packages=["microchain", "microchain.models", "microchain.engine"],
     install_requires=[
         "termcolor==2.4.0",
     ],
