@@ -52,7 +52,7 @@ class Function:
 
     @property
     def error(self):
-        return f"Error: wrong format. Use {self.signature}. Example: {self.example}"
+        return f"Error: wrong format. Use {self.signature}. Example: {self.example}. Please try again."
 
     def check_bind(self):
         if self.state is None:
