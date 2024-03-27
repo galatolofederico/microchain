@@ -2,14 +2,14 @@ from microchain.engine.function import Function, FunctionResult
 from termcolor import colored
 
 class Agent:
-    def __init__(self, llm, engine, handler=None):
+    def __init__(self, llm, engine, on_iteration_end=None):
         self.llm = llm
         self.engine = engine
         self.max_tries = 10
         self.prompt = None
         self.bootstrap = []
         self.do_stop = False
-        self.handler = handler
+        self.on_iteration_end = on_iteration_end
 
         self.engine.bind(self)
         self.reset()
@@ -129,7 +129,7 @@ class Agent:
                 role="user",
                 content=step_output["output"]
             ))
-            if self.handler is not None:
-                self.handler(self)
+            if self.on_iteration_end is not None:
+                self.on_iteration_end(self)
             
         print(colored(f"Finished {iterations} iterations", "green"))
