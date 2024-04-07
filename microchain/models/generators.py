@@ -34,7 +34,7 @@ class OpenAIChatGenerator:
                 stop=stop,
                 timeout=self.timeout
             )
-        except openai.error.OpenAIError as e:
+        except openai.OpenAIError as e:
             print(colored(f"Error: {e}", "red"))
             return "Error: timeout"
         
@@ -76,7 +76,7 @@ class OpenAITextGenerator:
                 top_p=self.top_p,
                 stop=stop
             )
-        except openai.error.OpenAIError as e:
+        except openai.OpenAIError as e:
             print(colored(f"Error: {e}", "red"))
             return "Error: timeout"
         
