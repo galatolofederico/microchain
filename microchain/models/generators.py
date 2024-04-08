@@ -22,6 +22,7 @@ class OpenAIChatGenerator:
     
     def __call__(self, messages, stop=None):
         import openai
+        oai_error = openai.error.OpenAIError if hasattr(openai, "error") else openai.OpenAIError
         assert isinstance(messages, list), "messages must be a list of messages https://platform.openai.com/docs/guides/text-generation/chat-completions-api"
 
         try:
@@ -34,7 +35,7 @@ class OpenAIChatGenerator:
                 stop=stop,
                 timeout=self.timeout
             )
-        except openai.OpenAIError as e:
+        except oai_error as e:
             print(colored(f"Error: {e}", "red"))
             return "Error: timeout"
         
@@ -65,6 +66,7 @@ class OpenAITextGenerator:
     
     def __call__(self, prompt, stop=None):
         import openai
+        oai_error = openai.error.OpenAIError if hasattr(openai, "error") else openai.OpenAIError
         assert isinstance(prompt, str), "prompt must be a string https://platform.openai.com/docs/guides/text-generation/chat-completions-api"
 
         try:
@@ -76,7 +78,7 @@ class OpenAITextGenerator:
                 top_p=self.top_p,
                 stop=stop
             )
-        except openai.OpenAIError as e:
+        except oai_error as e:
             print(colored(f"Error: {e}", "red"))
             return "Error: timeout"
         
