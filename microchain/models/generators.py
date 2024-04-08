@@ -1,7 +1,29 @@
 from termcolor import colored
 
+class TokenTracker:
+    def __init__(self):
+        self.prompt_tokens = 0
+        self.completion_tokens = 0
+
+    def update_from_usage(self, usage):
+        self.prompt_tokens += usage.prompt_tokens
+        self.completion_tokens += usage.completion_tokens
+
+    def get_total_cost(self, model):
+        if model in ["gpt-4-0125-preview", "gpt-4-1106-preview", "gpt-4-turbo-preview"]:
+            costs = {"prompt": 1e-05, "completion": 3e-05}
+        elif model == "gpt-3.5-turbo-0125":
+            costs = {"prompt": 5e-07, "completion": 1.5e-06}
+        else:
+            print(f"Unsupported {model}")
+            return 0
+
+        return self.prompt_tokens * costs["prompt"] + self.completion_tokens * costs["completion"]
+
+
+
 class OpenAIChatGenerator:
-    def __init__(self, *, model, api_key, api_base, temperature=0.9, top_p=1, max_tokens=512, timeout=30):
+    def __init__(self, *, model, api_key, api_base, temperature=0.9, top_p=1, max_tokens=512, timeout=30, token_tracker=TokenTracker()):
         try:
             import openai
         except ImportError:
@@ -14,6 +36,7 @@ class OpenAIChatGenerator:
         self.top_p = top_p
         self.max_tokens = max_tokens
         self.timeout = timeout
+        self.token_tracker = token_tracker
 
         self.client = openai.OpenAI(
             api_key=self.api_key,
@@ -38,12 +61,19 @@ class OpenAIChatGenerator:
         except oai_error as e:
             print(colored(f"Error: {e}", "red"))
             return "Error: timeout"
-        
+
         output = response.choices[0].message.content.strip()
+
+        if self.token_tracker:
+            self.token_tracker.update_from_usage(response.usage)
 
         return output
     
-
+    def print_usage(self):
+        if self.token_tracker:
+            print(f"Usage: prompt={self.token_tracker.prompt_tokens}, completion={self.token_tracker.completion_tokens}, cost=${self.token_tracker.get_total_cost(self.model):.2f}")
+        else:
+            print("Token tracker not available")
 
 class OpenAITextGenerator:
     def __init__(self, *, model, api_key, api_base, temperature=0.9, top_p=1, max_tokens=512):
