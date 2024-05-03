@@ -111,11 +111,10 @@ class Agent:
 
         if not resume:
             print(colored(f"prompt:\n{self.prompt}", "blue"))
-            print(colored(f"Running {iterations} iterations", "green"))
-
             self.reset()
             self.build_initial_messages()
 
+        print(colored(f"Running {iterations} iterations", "green"))
         for it in range(iterations):
             if self.do_stop:
                 break
