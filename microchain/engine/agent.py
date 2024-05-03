@@ -18,6 +18,23 @@ class Agent:
         self.history = []
         self.do_stop = False
 
+    def execute_command(self, command: str):
+        result, output = self.engine.execute(command)
+        if result == FunctionResult.ERROR:
+            raise Exception(f"Your command ({command}) contains an error. output={output}")
+
+        print(colored(f">> {command}", "blue"))
+        print(colored(f"{output}", "green"))
+
+        self.history.append(dict(
+            role="assistant",
+            content=command
+        ))
+        self.history.append(dict(
+            role="user",
+            content=output
+        ))
+
     def build_initial_messages(self):
         self.history = [
             dict(
@@ -26,21 +43,7 @@ class Agent:
             ),
         ]
         for command in self.bootstrap:
-            result, output = self.engine.execute(command)
-            if result == FunctionResult.ERROR:
-                raise Exception(f"Your bootstrap commands contain an error. output={output}")
-
-            print(colored(f">> {command}", "blue"))
-            print(colored(f"{output}", "green"))
-
-            self.history.append(dict(
-                role="assistant",
-                content=command
-            ))
-            self.history.append(dict(
-                role="user",
-                content=output
-            ))
+            self.execute_command(command)
             
     def clean_reply(self, reply):
         reply = reply.replace("\_", "_")
@@ -102,16 +105,16 @@ class Agent:
             output=output,
         )
 
-    def run(self, iterations=10):
+    def run(self, iterations=10, resume=False):
         if self.prompt is None:
             raise ValueError("You must set a prompt before running the agent")
 
-        print(colored(f"prompt:\n{self.prompt}", "blue"))
+        if not resume:
+            print(colored(f"prompt:\n{self.prompt}", "blue"))
+            self.reset()
+            self.build_initial_messages()
+
         print(colored(f"Running {iterations} iterations", "green"))
-
-        self.reset()
-        self.build_initial_messages()
-
         for it in range(iterations):
             if self.do_stop:
                 break
