@@ -38,8 +38,7 @@ class Function:
             raise ValueError(f"example_args must have the same length as call_parameters ({len(self.call_parameters)})")
 
         bound = self.call_signature.bind(*self.example_args)
-        
-        return f"{self.name}({', '.join([f'{name}={value}' for name, value in bound.arguments.items()])})"
+        return f"{self.name}({', '.join([f'{name}={repr(value)}' for name, value in bound.arguments.items()])})"
     
     @property
     def signature(self):
