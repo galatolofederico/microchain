@@ -2,7 +2,7 @@ from microchain.engine.function import Function, FunctionResult
 from termcolor import colored
 
 class Agent:
-    def __init__(self, llm, engine, on_iteration_end=None):
+    def __init__(self, llm, engine, on_iteration_end=None, stop_list=["\n"]):
         self.llm = llm
         self.engine = engine
         self.max_tries = 10
@@ -10,6 +10,7 @@ class Agent:
         self.bootstrap = []
         self.do_stop = False
         self.on_iteration_end = on_iteration_end
+        self.stop_list = stop_list
 
         self.engine.bind(self)
         self.reset()
@@ -73,7 +74,7 @@ class Agent:
                 abort = True
                 break
             
-            reply = self.llm(self.history + temp_messages, stop=["\n"])
+            reply = self.llm(self.history + temp_messages, stop=self.stop_list)
             reply = self.clean_reply(reply)
 
             if len(reply) < 2:
