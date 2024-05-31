@@ -115,7 +115,7 @@ class OpenAITextGenerator:
 
         if "choices" in response:  # vllm
             output = response.choices[0].text.strip()
-        elif "content" in respose: # llama.cpp
+        elif "content" in response: # llama.cpp
             output = response.content.strip()
         else:
             raise Exception("Unknown output format")
