@@ -7,6 +7,7 @@ class Agent:
         self.engine = engine
         self.max_tries = 10
         self.prompt = None
+        self.system_prompt = None
         self.bootstrap = []
         self.do_stop = False
         self.on_iteration_end = on_iteration_end
@@ -37,12 +38,21 @@ class Agent:
         ))
 
     def build_initial_messages(self):
-        self.history = [
-            dict(
-                role="user",
-                content=self.prompt
-            ),
-        ]
+        self.history = []
+        if self.prompt:
+            self.history.append(
+                dict(
+                    role="user",
+                    content=self.prompt
+                ),
+            )
+        if self.system_prompt:
+            self.history.append(
+                dict(
+                    role="system",
+                    content=self.system_prompt
+                ),
+            )
         for command in self.bootstrap:
             self.execute_command(command)
             
