@@ -39,18 +39,18 @@ class Agent:
 
     def build_initial_messages(self):
         self.history = []
-        if self.prompt:
-            self.history.append(
-                dict(
-                    role="user",
-                    content=self.prompt
-                ),
-            )
         if self.system_prompt:
             self.history.append(
                 dict(
                     role="system",
                     content=self.system_prompt
+                ),
+            )
+        if self.prompt:
+            self.history.append(
+                dict(
+                    role="user",
+                    content=self.prompt
                 ),
             )
         for command in self.bootstrap:
