@@ -120,8 +120,14 @@ class Agent:
         if self.prompt is None and self.system_prompt is None:
             raise ValueError("You must set a prompt before running the agent")
 
+        if not self.prompt is None and not self.system_prompt is None:
+            raise ValueError("You can't set both prompt and system_prompt")
+        
         if not resume:
-            print(colored(f"prompt:\n{self.prompt},system_prompt:\n{self.system_prompt}", "blue"))
+            if self.prompt:
+                print(colored(f"prompt:\n{self.prompt}", "blue"))
+            if self.system_prompt:
+                print(colored(f"system_prompt:\n{self.system_prompt}", "blue"))
             self.reset()
             self.build_initial_messages()
 
