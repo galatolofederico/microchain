@@ -67,7 +67,7 @@ class Agent:
     def stop(self):
         self.do_stop = True
 
-    def step(self):
+    def step(self, transient_history=[]):
         result = FunctionResult.ERROR
         temp_messages = []
         tries = 0
@@ -86,7 +86,7 @@ class Agent:
                 abort = True
                 break
             
-            reply = self.llm(self.history + temp_messages, stop=self.stop_list)
+            reply = self.llm(self.history + transient_history + temp_messages, stop=self.stop_list)
             reply = self.clean_reply(reply)
 
             if len(reply) < 2:
@@ -118,7 +118,7 @@ class Agent:
             output=output,
         )
 
-    def run(self, iterations=10, resume=False):
+    def run(self, iterations=10, resume=False, transient_history=[]):
         if self.prompt is None and self.system_prompt is None:
             raise ValueError("You must set a prompt before running the agent")
 
@@ -139,7 +139,7 @@ class Agent:
             if self.do_stop:
                 break
 
-            step_output = self.step()
+            step_output = self.step(transient_history)
             if self.on_iteration_step is not None: self.on_iteration_step(self, step_output)
 
             if step_output["abort"]:
