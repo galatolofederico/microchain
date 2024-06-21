@@ -133,8 +133,9 @@ class Agent:
             self.reset()
             self.build_initial_messages()
 
-        print(colored(f"Running {iterations} iterations", "green"))
-        for it in range(iterations):
+        print(colored(f"Running {iterations if iterations > 0 else 'infinite'} iterations", "green"))
+        it = 0
+        while iterations < 0 or it < iterations:
             if self.on_iteration_start is not None: self.on_iteration_start(self)
             if self.do_stop:
                 break
@@ -156,4 +157,5 @@ class Agent:
             if self.on_iteration_end is not None:
                 self.on_iteration_end(self)
             
+            it = it + 1
         print(colored(f"Finished {iterations} iterations", "green"))
