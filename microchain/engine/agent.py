@@ -90,9 +90,16 @@ class Agent:
             reply = self.clean_reply(reply)
 
             if len(reply) < 2:
-                print(colored("Error: empty reply, aborting", "red"))
-                abort = True
-                break
+                print(colored("Error: empty reply, retrying", "red"))
+                temp_messages.append(dict(
+                    role="assistant",
+                    content="..."
+                ))
+                temp_messages.append(dict(
+                    role="user",
+                    content="Error: please provide a valid function call"
+                ))
+                continue
 
             print(colored(f">> {reply}", "yellow"))
             
