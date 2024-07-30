@@ -22,7 +22,7 @@ class Usage(BaseModel):
     completion_tokens: int
 
 
-class ReplicateLlama31Generator:
+class ReplicateLlama31ChatGenerator:
     def __init__(
         self,
         *,
