@@ -1,4 +1,5 @@
-from microchain.models.generators import OpenAITextGenerator, OpenAIChatGenerator
+from microchain.models.openai_generators import OpenAITextGenerator, OpenAIChatGenerator
+from microchain.models.llama_generators import ReplicateLlama31Generator
 from microchain.models.templates import HFChatTemplate, VicunaTemplate
 from microchain.models.llm import LLM
 

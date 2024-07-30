@@ -16,6 +16,7 @@ setuptools.setup(
     packages=["microchain", "microchain.models", "microchain.engine"],
     install_requires=[
         "termcolor==2.4.0",
+        "pydantic>=2,<3",
     ],
     classifiers=[
         "Programming Language :: Python :: 3.11",
