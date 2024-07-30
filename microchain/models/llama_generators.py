@@ -27,6 +27,7 @@ class ReplicateLlama31ChatGenerator:
         self,
         *,
         model: str,
+        tokenizer_pretrained_model_name_or_path: str,
         api_key: str,
         # Default values set according to their API: https://replicate.com/meta/meta-llama-3.1-405b-instruct
         temperature: float = 0.6,
@@ -34,7 +35,6 @@ class ReplicateLlama31ChatGenerator:
         top_k: int = 50,
         max_tokens: int = 1024,
         token_tracker: TokenTracker | None = TokenTracker(),
-        tokenizer_pretrained_model_name_or_path: str = "hugging-quants/Meta-Llama-3.1-70B-Instruct-AWQ-INT4",
     ) -> None:
         try:
             from transformers import AutoTokenizer
