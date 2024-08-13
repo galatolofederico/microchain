@@ -169,4 +169,3 @@ class Agent:
             
             it = it + 1
         print(colored(f"Finished {iterations} iterations", "green"))
-        return step_output
