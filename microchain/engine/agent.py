@@ -125,6 +125,7 @@ class Agent:
             abort=abort,
             reply=reply,
             output=output,
+            result=result,
         )
 
     def run(self, iterations=10, resume=False, transient_history=[]):
