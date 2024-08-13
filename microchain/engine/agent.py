@@ -1,5 +1,7 @@
-from microchain.engine.function import Function, FunctionResult
 from termcolor import colored
+
+from microchain.engine.function import FunctionResult
+
 
 class Agent:
     def __init__(self, llm, engine, on_iteration_end=None):
@@ -133,3 +135,4 @@ class Agent:
                 self.on_iteration_end(self)
             
         print(colored(f"Finished {iterations} iterations", "green"))
+        return step_output
