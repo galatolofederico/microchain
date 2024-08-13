@@ -112,8 +112,13 @@ class OpenAITextGenerator:
         except oai_error as e:
             print(colored(f"Error: {e}", "red"))
             return "Error: timeout"
-        
-        output = response.choices[0].text.strip()
 
+        if "choices" in response:  # vllm
+            output = response.choices[0].text.strip()
+        elif "content" in response: # llama.cpp
+            output = response.content.strip()
+        else:
+            raise Exception("Unknown output format")
+        
         return output
     

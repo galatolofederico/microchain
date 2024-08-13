@@ -41,7 +41,7 @@ class TestAgent(unittest.TestCase):
         agent.bootstrap = [
             'Sum(a=2*2, b=2)'
         ]
-        self.assertRaisesRegex(Exception, r".*Your bootstrap commands contain an error\. output=Error: the command Sum\(a=2\*2, b=2\) must be a function call, you cannot use variables\. Please try again\..*", agent.run, 1)
+        self.assertRaisesRegex(Exception, r".*Your command \(Sum\(a=2\*2, b=2\)\) contains an error. output=Error: the command Sum\(a=2\*2, b=2\) must be a function call, you cannot use variables\. Please try again\..*", agent.run, 1)
 
     def test_step_empty_reply(self):
         engine = Engine()
@@ -59,7 +59,10 @@ class TestAgent(unittest.TestCase):
         with patch.multiple(sys, stdout=out, stderr=err):
             agent.run()
 
-        assert "Error: empty reply, aborting\n" in out.getvalue()
+        lines = out.getvalue().split("\n")
+
+        assert lines[3] == "Error: empty reply, retrying"
+        assert lines[-3] == "Tried 10 times (agent.max_tries) Aborting"
 
     def test_exceeded_max_tries(self):
         engine = Engine()

@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "README.md")
 
 setuptools.setup(
     name="microchain-python",
-    version="0.3.5",
+    version="0.4.3",
     author="Federico A. Galatolo",
     author_email="federico.galatolo@unipi.it",
     description="",
@@ -16,6 +16,7 @@ setuptools.setup(
     packages=["microchain", "microchain.models", "microchain.engine"],
     install_requires=[
         "termcolor==2.4.0",
+        "pydantic>=2,<3",
     ],
     classifiers=[
         "Programming Language :: Python :: 3.11",

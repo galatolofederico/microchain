@@ -4,14 +4,18 @@ from microchain.engine.function import FunctionResult
 
 
 class Agent:
-    def __init__(self, llm, engine, on_iteration_end=None):
+    def __init__(self, llm, engine, on_iteration_start=None, on_iteration_step=None, on_iteration_end=None, stop_list=["\n"]):
         self.llm = llm
         self.engine = engine
         self.max_tries = 10
         self.prompt = None
+        self.system_prompt = None
         self.bootstrap = []
         self.do_stop = False
+        self.on_iteration_start = on_iteration_start
+        self.on_iteration_step = on_iteration_step
         self.on_iteration_end = on_iteration_end
+        self.stop_list = stop_list
 
         self.engine.bind(self)
         self.reset()
@@ -20,29 +24,41 @@ class Agent:
         self.history = []
         self.do_stop = False
 
+    def execute_command(self, command: str):
+        result, output = self.engine.execute(command)
+        if result == FunctionResult.ERROR:
+            raise Exception(f"Your command ({command}) contains an error. output={output}")
+
+        print(colored(f">> {command}", "blue"))
+        print(colored(f"{output}", "green"))
+
+        self.history.append(dict(
+            role="assistant",
+            content=command
+        ))
+        self.history.append(dict(
+            role="user",
+            content=output
+        ))
+
     def build_initial_messages(self):
-        self.history = [
-            dict(
-                role="user",
-                content=self.prompt
-            ),
-        ]
+        self.history = []
+        if self.system_prompt:
+            self.history.append(
+                dict(
+                    role="system",
+                    content=self.system_prompt
+                ),
+            )
+        if self.prompt:
+            self.history.append(
+                dict(
+                    role="user",
+                    content=self.prompt
+                ),
+            )
         for command in self.bootstrap:
-            result, output = self.engine.execute(command)
-            if result == FunctionResult.ERROR:
-                raise Exception(f"Your bootstrap commands contain an error. output={output}")
-
-            print(colored(f">> {command}", "blue"))
-            print(colored(f"{output}", "green"))
-
-            self.history.append(dict(
-                role="assistant",
-                content=command
-            ))
-            self.history.append(dict(
-                role="user",
-                content=output
-            ))
+            self.execute_command(command)
             
     def clean_reply(self, reply):
         reply = reply.replace("\_", "_")
@@ -53,7 +69,7 @@ class Agent:
     def stop(self):
         self.do_stop = True
 
-    def step(self):
+    def step(self, transient_history=[]):
         result = FunctionResult.ERROR
         temp_messages = []
         tries = 0
@@ -72,13 +88,20 @@ class Agent:
                 abort = True
                 break
             
-            reply = self.llm(self.history + temp_messages, stop=["\n"])
+            reply = self.llm(self.history + transient_history + temp_messages, stop=self.stop_list)
             reply = self.clean_reply(reply)
 
             if len(reply) < 2:
-                print(colored("Error: empty reply, aborting", "red"))
-                abort = True
-                break
+                print(colored("Error: empty reply, retrying", "red"))
+                temp_messages.append(dict(
+                    role="assistant",
+                    content="..."
+                ))
+                temp_messages.append(dict(
+                    role="user",
+                    content="Error: please provide a valid function call"
+                ))
+                continue
 
             print(colored(f">> {reply}", "yellow"))
             
@@ -104,22 +127,31 @@ class Agent:
             output=output,
         )
 
-    def run(self, iterations=10):
-        if self.prompt is None:
+    def run(self, iterations=10, resume=False, transient_history=[]):
+        if self.prompt is None and self.system_prompt is None:
             raise ValueError("You must set a prompt before running the agent")
 
-        print(colored(f"prompt:\n{self.prompt}", "blue"))
-        print(colored(f"Running {iterations} iterations", "green"))
+        if not self.prompt is None and not self.system_prompt is None:
+            raise ValueError("You can't set both prompt and system_prompt")
+        
+        if not resume:
+            if self.prompt:
+                print(colored(f"prompt:\n{self.prompt}", "blue"))
+            if self.system_prompt:
+                print(colored(f"system_prompt:\n{self.system_prompt}", "blue"))
+            self.reset()
+            self.build_initial_messages()
 
-        self.reset()
-        self.build_initial_messages()
-
-        for it in range(iterations):
+        print(colored(f"Running {iterations if iterations > 0 else 'infinite'} iterations", "green"))
+        it = 0
+        while iterations < 0 or it < iterations:
+            if self.on_iteration_start is not None: self.on_iteration_start(self)
             if self.do_stop:
                 break
 
-            step_output = self.step()
-            
+            step_output = self.step(transient_history)
+            if self.on_iteration_step is not None: self.on_iteration_step(self, step_output)
+
             if step_output["abort"]:
                 break
 
@@ -134,5 +166,6 @@ class Agent:
             if self.on_iteration_end is not None:
                 self.on_iteration_end(self)
             
+            it = it + 1
         print(colored(f"Finished {iterations} iterations", "green"))
         return step_output
