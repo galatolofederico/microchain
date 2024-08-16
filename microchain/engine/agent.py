@@ -1,5 +1,15 @@
-from microchain.engine.function import Function, FunctionResult
+from dataclasses import dataclass
 from termcolor import colored
+
+from microchain.engine.function import FunctionResult
+
+
+@dataclass
+class StepOutput:
+    abort: bool
+    reply: str
+    output: str
+    result: FunctionResult
 
 class Agent:
     def __init__(self, llm, engine, on_iteration_start=None, on_iteration_step=None, on_iteration_end=None, stop_list=["\n"]):
@@ -119,10 +129,11 @@ class Agent:
                 print(colored(output, "green"))
                 break
         
-        return dict(
+        return StepOutput(
             abort=abort,
             reply=reply,
             output=output,
+            result=result,
         )
 
     def run(self, iterations=10, resume=False, transient_history=[]):
@@ -150,16 +161,16 @@ class Agent:
             step_output = self.step(transient_history)
             if self.on_iteration_step is not None: self.on_iteration_step(self, step_output)
 
-            if step_output["abort"]:
+            if step_output.abort:
                 break
 
             self.history.append(dict(
                 role="assistant",
-                content=step_output["reply"]
+                content=step_output.reply
             ))
             self.history.append(dict(
                 role="user",
-                content=step_output["output"]
+                content=step_output.output
             ))
             if self.on_iteration_end is not None:
                 self.on_iteration_end(self)
