@@ -6,4 +6,4 @@ from microchain.models.llm import LLM
 from microchain.engine.function import Function, FunctionResult
 from microchain.engine.engine import Engine
 
-from microchain.engine.agent import Agent
+from microchain.engine.agent import Agent, StepOutput

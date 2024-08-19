@@ -62,9 +62,16 @@ class Function:
         try:
             return FunctionResult.SUCCESS, str(self.__call__(*args, **kwargs))
         except Exception as e:
+            stacktrace = ''.join(traceback.TracebackException.from_exception(e).format())
             print(colored(f"Exception in Function call {e}", "red"))
-            print(colored(''.join(traceback.TracebackException.from_exception(e).format()), "red"))
-            return FunctionResult.ERROR, self.error
+            print(colored(stacktrace, "red"))
+
+            if type(e) in [TypeError, SyntaxError]:
+                # Catch remaining errors from a bad call
+                return FunctionResult.ERROR, self.error
+            else:
+                # Return the stacktrace of the error from inside the function
+                return FunctionResult.ERROR, f"Error inside function call: {stacktrace}"
 
     def __call__(self, command):
         raise NotImplementedError
