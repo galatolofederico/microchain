@@ -139,9 +139,6 @@ class Agent:
     def run(self, iterations=10, resume=False, transient_history=[]):
         if self.prompt is None and self.system_prompt is None:
             raise ValueError("You must set a prompt before running the agent")
-
-        if not self.prompt is None and not self.system_prompt is None:
-            raise ValueError("You can't set both prompt and system_prompt")
         
         if not resume:
             if self.prompt:
