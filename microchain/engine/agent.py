@@ -46,6 +46,8 @@ class Agent:
         self.step = observe()(self.step)
         self.run = observe()(self.run)
 
+        self.llm.init_langfuse()
+
     def reset(self):
         self.history = []
         self.do_stop = False

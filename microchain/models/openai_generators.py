@@ -24,7 +24,7 @@ class TokenTracker:
 
 
 class OpenAIChatGenerator:
-    def __init__(self, *, model, api_key, api_base, temperature=0.9, top_p=1, max_tokens=512, timeout=30, token_tracker=TokenTracker(), enable_langfuse=False):
+    def __init__(self, *, model, api_key, api_base, temperature=0.9, top_p=1, max_tokens=512, timeout=30, token_tracker=TokenTracker()):
         if enable_langfuse:
             try:
                 from langfuse.openai import openai
@@ -44,15 +44,11 @@ class OpenAIChatGenerator:
         self.max_tokens = max_tokens
         self.timeout = timeout
         self.token_tracker = token_tracker
-        self.enable_langfuse = enable_langfuse
 
         self.client = openai.OpenAI(
             api_key=self.api_key,
             base_url=self.api_base
         )
-
-        if self.enable_langfuse:
-            self.init_langfuse()
 
     def init_langfuse(self):
         try:
@@ -99,7 +95,7 @@ class OpenAIChatGenerator:
             print("Token tracker not available")
 
 class OpenAITextGenerator:
-    def __init__(self, *, model, api_key, api_base, temperature=0.9, top_p=1, max_tokens=512, enable_langfuse=False):
+    def __init__(self, *, model, api_key, api_base, temperature=0.9, top_p=1, max_tokens=512):
         if enable_langfuse:
             try:
                 from langfuse.openai import openai
@@ -117,16 +113,12 @@ class OpenAITextGenerator:
         self.temperature = temperature
         self.top_p = top_p
         self.max_tokens = max_tokens
-        self.enable_langfuse = enable_langfuse
 
         self.client = openai.OpenAI(
             api_key=self.api_key,
             base_url=self.api_base
         )
 
-        if self.enable_langfuse:
-            self.init_langfuse()
-    
     def init_langfuse(self):
         try:
             from langfuse.decorators import observe
