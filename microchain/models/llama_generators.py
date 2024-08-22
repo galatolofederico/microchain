@@ -52,6 +52,14 @@ class ReplicateLlama31ChatGenerator:
         self.tokenizer = AutoTokenizer.from_pretrained(
             tokenizer_pretrained_model_name_or_path
         )
+    
+    def init_langfuse(self):
+        try:
+            from langfuse.decorators import observe
+        except ImportError:
+            raise ImportError("Please install langfuse using pip install langfuse")
+        
+        self.__call__ = observe(name=self.__class__.__name__)(self.__call__)
 
     def __call__(
         self, messages: list[Llama31Message], stop: list[str] | None = None

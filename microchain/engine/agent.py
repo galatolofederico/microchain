@@ -12,7 +12,7 @@ class StepOutput:
     result: FunctionResult
 
 class Agent:
-    def __init__(self, llm, engine, on_iteration_start=None, on_iteration_step=None, on_iteration_end=None, stop_list=["\n"]):
+    def __init__(self, llm, engine, on_iteration_start=None, on_iteration_step=None, on_iteration_end=None, stop_list=["\n"], enable_langfuse=False):
         self.llm = llm
         self.engine = engine
         self.max_tries = 10
@@ -24,9 +24,29 @@ class Agent:
         self.on_iteration_step = on_iteration_step
         self.on_iteration_end = on_iteration_end
         self.stop_list = stop_list
+        self.enable_langfuse = enable_langfuse
 
         self.engine.bind(self)
         self.reset()
+
+        if self.enable_langfuse:
+            self.init_langfuse()
+
+    def init_langfuse(self):
+        try:
+            from langfuse.decorators import observe
+        except ImportError:
+            raise ImportError("Please install langfuse using pip install langfuse")
+    
+        self.reset = observe()(self.reset)
+        self.execute_command = observe()(self.execute_command)
+        self.build_initial_messages = observe()(self.build_initial_messages)
+        self.clean_reply = observe()(self.clean_reply)
+        self.stop = observe()(self.stop)
+        self.step = observe()(self.step)
+        self.run = observe()(self.run)
+
+        self.llm.init_langfuse()
 
     def reset(self):
         self.history = []
@@ -67,7 +87,7 @@ class Agent:
             )
         for command in self.bootstrap:
             self.execute_command(command)
-            
+
     def clean_reply(self, reply):
         reply = reply.replace("\_", "_")
         reply = reply.strip()

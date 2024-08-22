@@ -26,6 +26,17 @@ class Function:
         self.state = state
         self.engine = engine
 
+        if self.engine.agent.enable_langfuse:
+            self.init_langfuse()
+
+    def init_langfuse(self):
+        try:
+            from langfuse.decorators import observe
+        except ImportError:
+            raise ImportError("Please install langfuse using pip install langfuse")
+        
+        self.__call__ = observe(name=self.name)(self.__call__)
+
     @property
     def name(self):
         return type(self).__name__
