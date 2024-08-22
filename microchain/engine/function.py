@@ -25,8 +25,7 @@ class Function:
     def bind(self, *, state, engine):
         self.state = state
         self.engine = engine
-
-        if self.engine.agent.enable_langfuse:
+        if self.engine.agent is not None and getattr(self.engine.agent, "enable_langfuse", False):
             self.init_langfuse()
 
     def init_langfuse(self):
