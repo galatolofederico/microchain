@@ -35,6 +35,7 @@ class ReplicateLlama31ChatGenerator:
         top_k: int = 50,
         max_tokens: int = 1024,
         token_tracker: TokenTracker | None = TokenTracker(),
+        enable_langfuse: bool = False,
     ) -> None:
         try:
             from transformers import AutoTokenizer
@@ -49,9 +50,13 @@ class ReplicateLlama31ChatGenerator:
         self.top_k = top_k
         self.max_tokens = max_tokens
         self.token_tracker = token_tracker
+        self.enable_langfuse = enable_langfuse
         self.tokenizer = AutoTokenizer.from_pretrained(
             tokenizer_pretrained_model_name_or_path
         )
+
+        if self.enable_langfuse:
+            self.init_langfuse()
     
     def init_langfuse(self):
         try:

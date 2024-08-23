@@ -51,6 +51,9 @@ class OpenAIChatGenerator:
             base_url=self.api_base
         )
 
+        if self.enable_langfuse:
+            self.init_langfuse()
+
     def init_langfuse(self):
         try:
             from langfuse.decorators import observe
@@ -120,6 +123,9 @@ class OpenAITextGenerator:
             api_key=self.api_key,
             base_url=self.api_base
         )
+
+        if self.enable_langfuse:
+            self.init_langfuse()
 
     def init_langfuse(self):
         try:
