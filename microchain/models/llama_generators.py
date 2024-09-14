@@ -1,7 +1,7 @@
 import typing as t
 from enum import Enum
 
-from microchain.models.openai_generators import TokenTracker
+from microchain.models.token_tracker import TokenTracker
 from pydantic import BaseModel
 
 
